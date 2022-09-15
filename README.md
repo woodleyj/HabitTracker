@@ -1,7 +1,7 @@
-# Habit Tracker App Project
-[Description]
+# Habit Tracker App
 ## What is it?
-[stuff]
+A CLI (command-line interface) for adding, tracking and modifying your habits!
+
 ## How to install
 [installation instructions]
 ```
