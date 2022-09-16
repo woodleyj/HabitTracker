@@ -3,7 +3,6 @@
 A CLI (command-line interface) for adding, tracking and modifying your habits!
 
 ## How to install
-[installation instructions]
 ```
 pip install -r requirements.txt
 ```
