@@ -8,9 +8,9 @@ pip install -r requirements.txt
 ```
 ## Usage
 ```
-python main.py
+python tracker.py
 ```
-And follow instructions on screen.
+This will show you a list of arguments that you can provide when running the program.
 ## Tests
 ```
 pytest .
