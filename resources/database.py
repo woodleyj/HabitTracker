@@ -29,7 +29,6 @@ class DBConn:
 
     def add_record(self, habit_name: str, habit_desc: str, interval: str):
         created_date = datetime.today().date()
-        created_week = str(created_date.isocalendar()[1])
 
         try:
             self.cursor.execute(
@@ -139,7 +138,9 @@ class DBConn:
         if reset_streak:
             self.cursor.execute("UPDATE habits SET streak_count = 0 WHERE name =:habit_name",
                                 {'habit_name': habit_name})
+            self.conn.commit()
             return f"Streak Count reset for habit: {habit_name} !"
+
 
         self.cursor.execute("SELECT streak_count, max_streak FROM habits WHERE name = :habit_name",
                             {'habit_name': habit_name})
@@ -150,5 +151,5 @@ class DBConn:
                             "WHERE name =:habit_name", {"streak_count": streak_count,
                                                         "max_streak": max_streak,
                                                         "habit_name": habit_name})
-
+        self.conn.commit()
         return

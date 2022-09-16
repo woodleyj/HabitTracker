@@ -155,6 +155,8 @@ def show_today():
     db = DBConn()
     today = str(datetime.today().date())
     yesterday = str(datetime.today().date() - timedelta(days=1))
+    this_week = datetime.today().isocalendar()[1]
+    last_week = this_week - 1
 
     # Checking if streak is maintained
 
@@ -168,20 +170,40 @@ def show_today():
 
         # Row[0] represents the habit name
         records = db.fetch_habit_history(row[0])
+        # Check interval/periodicity
+        if row[2] == "Daily":
+            if today in records:
+                task_completion_status = "\N{heavy check mark} "
+                completed_today = True
+            else:
+                task_completion_status = "\N{heavy multiplication x} "
+                completed_today = False
 
-        if today in records:
-            task_completed = "\N{heavy check mark} "
-        else:
-            task_completed = "\N{heavy multiplication x} "
+            row.append(task_completion_status)
 
-        row.append(task_completed)
+            # Check if Streak is maintained if habit currently has a streak
+            # row[4] represents the Streak Count column
+            if not row[4] == "0" and not completed_today:  # If it has a streak and not completed today
+                if yesterday not in records:  # Check the records for yesterday's date and if not, reset streak
+                    row[4] = "0"
+                    db.update_streak(row[0], reset_streak=True)  # row[0] is habit name
 
-        # Check if Streak is maintained if habit currently has a streak
-        # row[4] represents the Streak Count column
-        if not row[4] == "0":  # if the Streak Count is not '0', in other words, if it has a streak
-            if yesterday not in records:  # Check the records for yesterday's date and if not, reset streak
-                row[4] = "0"
-                db.update_streak(row[0], reset_streak=True) # row[0] is habit name
+        elif row[2] == "Weekly":
+            if str(this_week) in records:
+                task_completion_status = "\N{heavy check mark} "
+                completed_this_week = True
+            else:
+                task_completion_status = "\N{heavy multiplication x} "
+                completed_this_week = False
+
+            row.append(task_completion_status)
+
+            # Check if Streak is maintained if habit currently has a streak
+            # row[4] represents the Streak Count column
+            if not row[4] == "0" and not completed_this_week:  # If it has a streak and not completed this week
+                if str(last_week) not in records:  # Check the records for last week's number and if not, reset streak
+                    row[4] = "0"
+                    db.update_streak(row[0], reset_streak=True)  # row[0] is habit name
 
     table = create_table(rows=tasks)
     return table
