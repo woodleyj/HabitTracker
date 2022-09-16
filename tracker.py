@@ -1,7 +1,7 @@
 import click
 import inquirer
 from rich import print
-from datetime import datetime
+from datetime import datetime, timedelta
 from resources.database import DBConn
 from resources.table import create_table, create_history_table
 from resources.menus import analyze_menu, create_delete_menu, create_habit_select_menu, interval_menu, modify_menu
@@ -116,6 +116,9 @@ def modify_habits():
     habit_selection = inquirer.prompt(habit_select_menu)
     habit_selection = habit_selection["selection"]
 
+    if habit_selection == "CANCEL":
+        return "Action canceled."
+
     # Prompt user for type of modification
     answer = inquirer.prompt(modify_menu)
 
@@ -145,12 +148,16 @@ def modify_habits():
             return
 
     if answer["selection"] == "CANCEL":
-        return
+        return "Action canceled."
 
 
 def show_today():
     db = DBConn()
     today = str(datetime.today().date())
+    yesterday = str(datetime.today().date() - timedelta(days=1))
+
+    # Checking if streak is maintained
+
     tasks = db.display_all()
     if not tasks:
         click.echo("No habits to display.  Please create some first.")
@@ -158,6 +165,7 @@ def show_today():
 
     # Fetch streak and task completion information and add it to list to display in table
     for row in tasks:
+
         # Row[0] represents the habit name
         records = db.fetch_habit_history(row[0])
 
@@ -167,6 +175,13 @@ def show_today():
             task_completed = "\N{heavy multiplication x} "
 
         row.append(task_completed)
+
+        # Check if Streak is maintained if habit currently has a streak
+        # row[4] represents the Streak Count column
+        if not row[4] == "0":  # if the Streak Count is not '0', in other words, if it has a streak
+            if yesterday not in records:  # Check the records for yesterday's date and if not, reset streak
+                row[4] = "0"
+                db.update_streak(row[0], reset_streak=True) # row[0] is habit name
 
     table = create_table(rows=tasks)
     return table

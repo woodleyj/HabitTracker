@@ -24,7 +24,7 @@ modify_menu = [
     inquirer.List(
         "selection",
         message="What would you like to do?",
-        choices=["Change Name", "Change Description", "Change Interval"]
+        choices=["Change Name", "Change Description", "Change Interval", "CANCEL"]
     ),
 ]
 

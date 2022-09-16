@@ -134,7 +134,13 @@ class DBConn:
         else:
             return f"Updated {self.cursor.rowcount} record(s) successfully."
 
-    def update_streak(self, habit_name: str):
+    def update_streak(self, habit_name: str, reset_streak: bool = False):
+
+        if reset_streak:
+            self.cursor.execute("UPDATE habits SET streak_count = 0 WHERE name =:habit_name",
+                                {'habit_name': habit_name})
+            return f"Streak Count reset for habit: {habit_name} !"
+
         self.cursor.execute("SELECT streak_count, max_streak FROM habits WHERE name = :habit_name",
                             {'habit_name': habit_name})
         streak_list = self._convert_to_lists(self.cursor.fetchall(), nested_list=False)
