@@ -112,7 +112,7 @@ class DBConn:
 
     def display_interval_habits(self, interval: str):
         self.cursor.execute("SELECT * FROM habits WHERE interval=:interval", {'interval': interval})
-        return self.cursor.fetchall()
+        return self._convert_to_lists(self.cursor.fetchall())
 
     def update_record(self, habit_name: str, attr_to_update: str, update_value: str):
         if attr_to_update == "name":

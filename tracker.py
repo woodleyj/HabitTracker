@@ -79,6 +79,8 @@ def analyze_habits():
         if not habits:
             return "No habits to display"
 
+        habits = check_task_streak(habits)
+
         table = create_table(rows=habits)
         return table
 
@@ -87,6 +89,8 @@ def analyze_habits():
 
         if not habits:
             return "No habits to display."
+
+        habits = check_task_streak(habits)
 
         table = create_table(rows=habits)
         return table
@@ -151,19 +155,18 @@ def modify_habits():
         return "Action canceled."
 
 
-def show_today():
+def check_task_streak(tasks: list = None):
     db = DBConn()
+    if tasks is None:
+        tasks = db.display_all()
+    if not tasks:
+        click.echo("No habits to display.  Please create some first.")
+        return
+
     today = str(datetime.today().date())
     yesterday = str(datetime.today().date() - timedelta(days=1))
     this_week = datetime.today().isocalendar()[1]
     last_week = this_week - 1
-
-    # Checking if streak is maintained
-
-    tasks = db.display_all()
-    if not tasks:
-        click.echo("No habits to display.  Please create some first.")
-        return
 
     # Fetch streak and task completion information and add it to list to display in table
     for row in tasks:
@@ -204,6 +207,15 @@ def show_today():
                 if str(last_week) not in records:  # Check the records for last week's number and if not, reset streak
                     row[4] = "0"
                     db.update_streak(row[0], reset_streak=True)  # row[0] is habit name
+    click.echo(tasks)
+    return tasks
+
+
+def show_today():
+    db = DBConn()
+    # Checking if streak is maintained
+
+    tasks = check_task_streak()
 
     table = create_table(rows=tasks)
     return table
