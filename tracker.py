@@ -96,7 +96,8 @@ def analyze_habits():
         print(table)
 
     elif answer["selection"] == "Longest Streak Overall":
-        return "COMING SOON"
+        longest_habit = db.fetch_longest()
+        print(longest_habit)
 
     elif answer["selection"] == "Longest Streak (select habit)":
         return "COMING SOON"
@@ -230,7 +231,7 @@ def cli():
     pass
 
 
-@cli.command()
+@cli.command("interactive")
 def interactive_menu():
     main_menu = [
         inquirer.List(

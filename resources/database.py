@@ -86,6 +86,14 @@ class DBConn:
                             {'habit_name': habit_name})
         return self._convert_to_lists(self.cursor.fetchall(), nested_list=False)
 
+    def fetch_longest(self, habit_name: str = None):
+        if habit_name is None:
+            self.cursor.execute("SELECT *, max(max_streak) FROM habits")
+            return self._convert_to_lists(self.cursor.fetchall(), nested_list=False)
+
+        else:
+            return
+
     @staticmethod
     def _convert_to_lists(tuple_list: list, nested_list: bool = True):
         if nested_list:
