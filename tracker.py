@@ -68,32 +68,32 @@ def display_history():
     return table
 
 
+def show_interval(interval: str):
+    db = DBConn()
+
+    habits = db.display_interval_habits(interval)
+
+    if not habits:
+        return "No habits to display"
+
+    habits = check_task_streak(habits)
+
+    table = create_table(rows=habits)
+    return table
+
+
 def analyze_habits():
     db = DBConn()
 
     answer = inquirer.prompt(analyze_menu)
 
     if answer["selection"] == "Show Daily":
-        habits = db.display_interval_habits("Daily")
-
-        if not habits:
-            return "No habits to display"
-
-        habits = check_task_streak(habits)
-
-        table = create_table(rows=habits)
-        return table
+        table = show_interval("Daily")
+        print(table)
 
     elif answer["selection"] == "Show Weekly":
-        habits = db.display_interval_habits("Weekly")
-
-        if not habits:
-            return "No habits to display."
-
-        habits = check_task_streak(habits)
-
-        table = create_table(rows=habits)
-        return table
+        table = show_interval("Weekly")
+        print(table)
 
     elif answer["selection"] == "Longest Streak Overall":
         return "COMING SOON"
@@ -207,18 +207,18 @@ def check_task_streak(tasks: list = None):
                 if str(last_week) not in records:  # Check the records for last week's number and if not, reset streak
                     row[4] = "0"
                     db.update_streak(row[0], reset_streak=True)  # row[0] is habit name
-    click.echo(tasks)
+
     return tasks
 
 
 def show_today():
     db = DBConn()
-    # Checking if streak is maintained
 
+    # Checking if streak is maintained
     tasks = check_task_streak()
 
     table = create_table(rows=tasks)
-    return table
+    print(table)
 
 
 def exit_cleanup():
@@ -247,25 +247,25 @@ def interactive_menu():
         answer = inquirer.prompt(main_menu)
 
         if answer["selection"] == "Add Habit":
-            click.echo(add_habit())
+            add_habit()
 
         elif answer["selection"] == "Complete Task":
-            click.echo(complete_task())
+            complete_task()
 
         elif answer["selection"] == "Delete Habit":
-            click.echo(delete_habit())
+            delete_habit()
 
         elif answer["selection"] == "Analyze Habits":
-            print(analyze_habits())
+            analyze_habits()
 
         elif answer["selection"] == "Modify Habits":
-            click.echo(modify_habits())
+            modify_habits()
 
         elif answer["selection"] == "Show Today":
-            print(show_today())
+            show_today()
 
         elif answer["selection"] == "Exit App":
-            click.echo(exit_cleanup())
+            exit_cleanup()
             break
 
         click.prompt("Press Enter to continue", default="", show_default=False, prompt_suffix="...")
