@@ -42,7 +42,6 @@ def complete_task():
     db = DBConn()
     # Show Tasks for today
     habits = db.display_habit_names()
-    print(habits)
     if not habits:
         return click.echo("No tasks to complete.  Maybe you should create some first :)")
 
@@ -96,8 +95,10 @@ def analyze_habits():
         print(table)
 
     elif answer["selection"] == "Longest Streak Overall":
-        longest_habit = db.fetch_longest()
-        print(longest_habit)
+        longest = db.fetch_longest()
+
+        print(f"Your longest streak is {longest[5]}, for habit:  {longest[0]} - {longest[1]} - {longest[2]}")
+        print(f"You started this habit on {longest[3]} and the current streak is {longest[4]}.")
 
     elif answer["selection"] == "Longest Streak (select habit)":
         return "COMING SOON"
@@ -284,27 +285,27 @@ def delete_habit_command():
 
 @cli.command("display-history")
 def display_history_command():
-    print(display_history())
+    display_history()
 
 
 @cli.command("show-today")
 def show_today_command():
-    print(show_today())
+    show_today()
 
 
 @cli.command("complete-task")
 def complete_task_command():
-    click.echo(complete_task())
+    complete_task()
 
 
 @cli.command("analyze-habits")
 def analyze_habits_command():
-    click.echo(analyze_habits())
+    analyze_habits()
 
 
 @cli.command("modify-habits")
 def modify_habits_command():
-    click.echo(modify_habits())
+    modify_habits()
 
 
 if __name__ == '__main__':
