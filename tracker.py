@@ -246,7 +246,7 @@ def show_today():
 @click.group()
 def cli():
     """This little command-line app can be used to help you track your habits.  You can add, complete, and modify your
-    habits, as well as see the history and your longest streaks.  Try using the -interactive flag to get started."""
+    habits, as well as see the history and your longest streaks.  Try using the -interactive argument to get started."""
     pass
 
 
@@ -254,7 +254,7 @@ def cli():
 def interactive_menu():
     """Interactive version of the CLI.  The app runs in a loop until you decide to exit by selecting the EXIT
     command from the menus.  Here you can see the different options within this application and navigate through
-    them as much as you wish without having to call the main application with a parameter like a traditional CLI.
+    them as much as you wish without having to call the main application with an argument like a traditional CLI.
 
     Use the arrow keys to change the selection and press ENTER to confirm selection."""
     main_menu = [
@@ -297,36 +297,43 @@ def interactive_menu():
 
 @cli.command("add-habit")
 def add_habit_command():
+    """Add a habit to your habit list."""
     add_habit()
 
 
 @cli.command("delete-habit")
 def delete_habit_command():
+    """Delete a habit from your habit list."""
     click.echo(delete_habit())
 
 
 @cli.command("display-history")
 def display_history_command():
+    """Show the history of your habits."""
     display_history()
 
 
 @cli.command("show-today")
 def show_today_command():
+    """Shows your current habits list."""
     show_today()
 
 
 @cli.command("complete-task")
 def complete_task_command():
+    """Complete a task for a selected habit."""
     complete_task()
 
 
 @cli.command("analyze-habits")
 def analyze_habits_command():
+    """Show all Daily, Weekly, or streak info for your habits."""
     analyze_habits()
 
 
 @cli.command("modify-habits")
 def modify_habits_command():
+    """Modify the name, description, or interval of a habit."""
     modify_habits()
 
 
