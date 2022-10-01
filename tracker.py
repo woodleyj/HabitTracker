@@ -97,11 +97,31 @@ def analyze_habits():
     elif answer["selection"] == "Longest Streak Overall":
         longest = db.fetch_longest()
 
-        print(f"Your longest streak is {longest[5]}, for habit:  {longest[0]} - {longest[1]} - {longest[2]}")
+        print(f"Your longest streak is {longest[5]}, for habit: '{longest[0]}', which should be completed "
+              f"{longest[2].upper()}.")
         print(f"You started this habit on {longest[3]} and the current streak is {longest[4]}.")
 
     elif answer["selection"] == "Longest Streak (select habit)":
-        return "COMING SOON"
+        tasks = db.display_habit_names()
+        if not tasks:
+            click.echo("No habits to display.  Please create some first.")
+            return
+
+        choices = [t for task in tasks for t in task]
+        choices.append("CANCEL")
+
+        # Show user selection of habits to choose from
+        habit_select_menu = create_habit_select_menu(choices)
+        habit_selection = inquirer.prompt(habit_select_menu)
+        habit_selection = habit_selection["selection"]
+
+        if habit_selection == "CANCEL":
+            print("Action canceled.")
+            return
+
+        longest = db.fetch_longest(habit_selection)
+        print(f"'{longest[0]}' -- {longest[2].upper()}: The longest streak for this habit is {longest[5]}.")
+        print(f"You started this habit on {longest[3]} and the current streak is {longest[4]}.")
 
     else:
         return "Invalid Selection, try again."
@@ -223,17 +243,20 @@ def show_today():
     print(table)
 
 
-def exit_cleanup():
-    return "Saving changes... Exit."
-
-
 @click.group()
 def cli():
+    """This little command-line app can be used to help you track your habits.  You can add, complete, and modify your
+    habits, as well as see the history and your longest streaks.  Try using the -interactive flag to get started."""
     pass
 
 
 @cli.command("interactive")
 def interactive_menu():
+    """Interactive version of the CLI.  The app runs in a loop until you decide to exit by selecting the EXIT
+    command from the menus.  Here you can see the different options within this application and navigate through
+    them as much as you wish without having to call the main application with a parameter like a traditional CLI.
+
+    Use the arrow keys to change the selection and press ENTER to confirm selection."""
     main_menu = [
         inquirer.List(
             "selection",
@@ -267,7 +290,6 @@ def interactive_menu():
             show_today()
 
         elif answer["selection"] == "Exit App":
-            exit_cleanup()
             break
 
         click.prompt("Press Enter to continue", default="", show_default=False, prompt_suffix="...")

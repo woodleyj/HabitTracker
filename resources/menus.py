@@ -40,7 +40,7 @@ def create_delete_menu(choices: list):
     return delete_menu
 
 
-def create_habit_select_menu(choices: list, message: str = "Which habit would you like to change?"):
+def create_habit_select_menu(choices: list, message: str = "Select Habit: "):
     habit_select_menu = [
         inquirer.List(
             "selection",
