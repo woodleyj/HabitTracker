@@ -56,7 +56,7 @@ def complete_task():
         if habit_name == "CANCEL":
             return "Action Canceled."
 
-        return db.complete_task(habit_name=habit_name)
+        print(db.complete_task(habit_name=habit_name))
 
 
 def display_history():
@@ -195,7 +195,7 @@ def check_task_streak(tasks: list = None):
 
         # Row[0] represents the habit name
         records = db.fetch_habit_history(row[0])
-        # Check interval/periodicity
+        # Check interval/periodicity - row[2] represents interval
         if row[2] == "Daily":
             if today in records:
                 task_completion_status = "\N{heavy check mark} "
@@ -238,7 +238,7 @@ def show_today():
 
     # Checking if streak is maintained
     tasks = check_task_streak()
-
+    print(tasks)
     table = create_table(rows=tasks)
     print(table)
 
