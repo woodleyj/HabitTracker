@@ -64,7 +64,7 @@ def display_history():
     history = db.display_all(table_name="tracker")
 
     table = create_history_table(rows=history)
-    return table
+    print(table)
 
 
 def show_interval(interval: str):
@@ -246,7 +246,7 @@ def show_today():
 @click.group()
 def cli():
     """This little command-line app can be used to help you track your habits.  You can add, complete, and modify your
-    habits, as well as see the history and your longest streaks.  Try using the -interactive argument to get started."""
+    habits, as well as see the history and your longest streaks.  Try using the interactive argument to get started."""
     pass
 
 
