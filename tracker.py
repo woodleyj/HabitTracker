@@ -1,5 +1,6 @@
 import click
 import inquirer
+from os import path
 from rich import print
 from datetime import datetime, timedelta
 from resources.database import DBConn
@@ -8,23 +9,33 @@ from resources.menus import analyze_menu, create_delete_menu, create_habit_selec
 
 
 def add_habit():
+    """Prompts the user for input and adds the habit information provided to the database."""
+
+    # Use the click prompts to get input from user
     name = click.prompt("Enter name of habit")
     desc = click.prompt("Enter description of habit (optional)", default="--", show_default=False)
     interval = inquirer.prompt(interval_menu)
 
+    # Create a connection to the db and add the record
     db = DBConn()
     message = db.add_record(name, desc, interval['selection'])
+
+    # Print the success/fail message to the user
     click.echo(message)
 
 
 def delete_habit():
+    """Prompts the user to select an existing habit and then deletes the habit information from the database."""
+
+    # Create a connection to the db and retrieve the habit records
     db = DBConn()
     habits = db.display_habit_names()
     if not habits:
         return click.echo("No Habits to delete.  Maybe you should create some first :)")
 
     else:
-        choices = [item for sublist in habits for item in sublist]
+        # Show list of habit names to user and allow user to select
+        choices = [item for sublist in habits for item in sublist]  # Just rearranging the output from the db to a list
         choices.append("CANCEL")
         delete_menu = create_delete_menu(choices)
         habit_name = inquirer.prompt(delete_menu)
@@ -39,8 +50,10 @@ def delete_habit():
 
 
 def complete_task():
+    """Prompts the user to select a task to complete, then updates the record in the database."""
+
+    # Create a connection to the database and retrieve habit records to display to the user
     db = DBConn()
-    # Show Tasks for today
     habits = db.display_habit_names()
     if not habits:
         return click.echo("No tasks to complete.  Maybe you should create some first :)")
@@ -60,30 +73,47 @@ def complete_task():
 
 
 def display_history():
+    """Shows the history of all previously completed tasks."""
+
+    # Create connection to the database and retrieve the history the tracker table
     db = DBConn()
     history = db.display_all(table_name="tracker")
 
+    # Arrange the information in a nice table to output to the user
     table = create_history_table(rows=history)
     print(table)
 
 
 def show_interval(interval: str):
-    db = DBConn()
+    """Retrieves only habits with a specified interval and outputs to the terminal."""
 
+    # Create connection to the database and retrieve habits matching specified interval
+    db = DBConn()
     habits = db.display_interval_habits(interval)
 
     if not habits:
         return "No habits to display"
 
+    # Check the task streak
     habits = check_task_streak(habits)
-
+    # Create a nice table to output to the user
     table = create_table(rows=habits)
     return table
 
 
 def analyze_habits():
-    db = DBConn()
+    """
+    Show the Analyze Menu and allow the user to select further options for analysis.
 
+    Show Daily - retrieve only the habits with Daily set as the interval.
+    Show Weekly - retrieve only the habits with Weekly set as the interval.
+    Longest Streak Overall - retrieve the habit with the longest streak.
+    Longest Streak (selected task) - prompt user to select a habit, then show the streak information for that habit.
+    """
+
+    # Create a connection to the database
+    db = DBConn()
+    # Show Analyze menu to the user
     answer = inquirer.prompt(analyze_menu)
 
     if answer["selection"] == "Show Daily":
@@ -128,6 +158,9 @@ def analyze_habits():
 
 
 def modify_habits():
+    """Allows the user to modify different attributes of the currently tracked habits in the database."""
+
+    # Create connection to the database and show habits to user
     db = DBConn()
     tasks = db.display_habit_names()
     if not tasks:
@@ -178,6 +211,13 @@ def modify_habits():
 
 
 def check_task_streak(tasks: list = None):
+    """Checks the streak for all of the tasks (default) or a list of tasks (if specified) and updates accordingly.
+
+    :param tasks: a list of tasks to check (optional)
+    :return: list of tasks from the database
+    """
+
+    # Create connection to the database
     db = DBConn()
     if tasks is None:
         tasks = db.display_all()
@@ -185,6 +225,7 @@ def check_task_streak(tasks: list = None):
         click.echo("No habits to display.  Please create some first.")
         return
 
+    # Set date information so we can check if task was completed recently and if streak is still going
     today = str(datetime.today().date())
     yesterday = str(datetime.today().date() - timedelta(days=1))
     this_week = datetime.today().isocalendar()[1]
@@ -234,11 +275,11 @@ def check_task_streak(tasks: list = None):
 
 
 def show_today():
-    db = DBConn()
+    """Show all of the currently tracked habits in a table format."""
 
     # Checking if streak is maintained
     tasks = check_task_streak()
-    print(tasks)
+    # Create a nice table to output to the user
     table = create_table(rows=tasks)
     print(table)
 
@@ -338,4 +379,6 @@ def modify_habits_command():
 
 
 if __name__ == '__main__':
+    if not path.exists("main.db"):
+        DBConn().starter_habits()
     cli()

@@ -1,6 +1,8 @@
 from rich.table import Table
 
-""" Function to create a table using the Rich library.  Used to output a table in the terminal.
+""" 
+Functions to create tables using the Rich library.  Used to output a table in the terminal.
+
     title:  String
     columns: List of strings for the column headers
     rows: This should be a list of tuples, which is the output from the sqlite3 query
