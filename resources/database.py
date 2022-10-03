@@ -44,7 +44,14 @@ class DBConn:
             self.add_record(habits[i], descriptions[i], intervals[i])
 
     def add_record(self, habit_name: str, habit_desc: str, interval: str):
-        """Add record to the database/habits table."""
+        """
+        Add record to the database/habits table.
+
+        :param habit_name: name of habit
+        :param habit_desc: description of the habit
+        :param interval: interval of the habit
+        :return: success/fail message of the database operation
+        """
 
         # Get today's date to add to database so we have a record of when something was added
         created_date = datetime.today().date()
@@ -72,6 +79,7 @@ class DBConn:
         :param habit_name: name of the habit
         :return: the interval of the specified habit
         """
+
         self.cursor.execute("SELECT interval FROM habits WHERE name = :habit_name", {'habit_name': habit_name})
         return self._convert_to_lists(self.cursor.fetchall(), nested_list=False)[0]
 
