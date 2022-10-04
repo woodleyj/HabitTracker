@@ -1,11 +1,31 @@
 import click
 import inquirer
-from os import path
+from os import path, remove
 from rich import print
 from datetime import datetime, timedelta
+from resources.habit import Habit
 from resources.database import DBConn
 from resources.table import create_table, create_history_table
 from resources.menus import analyze_menu, create_delete_menu, create_habit_select_menu, interval_menu, modify_menu
+
+
+def _starter_habits():
+    """Set up the first 5 starter habits for the user"""
+
+    habits = ["Drink Water", "Read", "Exercise", "Meditate", "Walk in Nature"]
+    descriptions = ["One Liter", "One Chapter", "Thirty Minutes", "Twenty Minutes", "One Hour"]
+    intervals = ["Daily", "Daily", "Daily", "Daily", "Weekly"]
+
+    # Open connection to database
+    db = DBConn()
+
+    print("Setting up starter habits...\n")
+
+    # Loop through and create the 5 starter habits and write to database
+    for i in range(len(habits)):
+        new_habit = Habit(habits[i], descriptions[i], intervals[i])
+        message = db.add_record(new_habit.details)
+        print(message)
 
 
 def add_habit():
@@ -16,12 +36,15 @@ def add_habit():
     desc = click.prompt("Enter description of habit (optional)", default="--", show_default=False)
     interval = inquirer.prompt(interval_menu)
 
-    # Create a connection to the db and add the record
+    # Instantiate the habit object
+    new_habit = Habit(name, desc, interval["selection"])
+
+    # Create a connection to the db and add the new habit
     db = DBConn()
-    message = db.add_record(name, desc, interval['selection'])
+    message = db.add_record(new_habit.details)
 
     # Print the success/fail message to the user
-    click.echo(message)
+    print(message)
 
 
 def delete_habit():
@@ -31,7 +54,7 @@ def delete_habit():
     db = DBConn()
     habits = db.display_habit_names()
     if not habits:
-        return click.echo("No Habits to delete.  Maybe you should create some first :)")
+        return print("No Habits to delete.  Maybe you should create some first :)")
 
     else:
         # Show list of habit names to user and allow user to select
@@ -46,7 +69,7 @@ def delete_habit():
         else:
             if click.confirm(f"Are you sure you want to delete '{habit_name}'?"):
                 db.delete_record(habit_name)
-                click.echo(f"Habit '{habit_name}' deleted.")
+                print(f"Habit '{habit_name}' deleted.")
 
 
 def complete_task():
@@ -211,7 +234,8 @@ def modify_habits():
 
 
 def check_task_streak(tasks: list = None):
-    """Checks the streak for all of the tasks (default) or a list of tasks (if specified) and updates accordingly.
+    """
+    Checks the streak for all the tasks (default) or a list of tasks (if specified) and updates accordingly.
 
     :param tasks: a list of tasks to check (optional)
     :return: list of tasks from the database
@@ -225,7 +249,7 @@ def check_task_streak(tasks: list = None):
         click.echo("No habits to display.  Please create some first.")
         return
 
-    # Set date information so we can check if task was completed recently and if streak is still going
+    # Set date information, so we can check if task was completed recently and if streak is still going
     today = str(datetime.today().date())
     yesterday = str(datetime.today().date() - timedelta(days=1))
     this_week = datetime.today().isocalendar()[1]
@@ -275,13 +299,18 @@ def check_task_streak(tasks: list = None):
 
 
 def show_today():
-    """Show all of the currently tracked habits in a table format."""
+    """Show all the currently tracked habits in a table format."""
 
     # Checking if streak is maintained
     tasks = check_task_streak()
     # Create a nice table to output to the user
     table = create_table(rows=tasks)
     print(table)
+
+
+def reset():
+    """Reset the app by deleting the database.  ***WARNING:  ALL DATA WILL BE LOST*** """
+    remove("main.db")
 
 
 @click.group()
@@ -378,7 +407,13 @@ def modify_habits_command():
     modify_habits()
 
 
+@cli.command("reset")
+def reset_command():
+    """Reset the app by deleting the database.  ***WARNING:  ALL DATA WILL BE LOST*** """
+    reset()
+
+
 if __name__ == '__main__':
     if not path.exists("main.db"):
-        DBConn().starter_habits()
+        _starter_habits()
     cli()

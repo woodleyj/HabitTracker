@@ -33,28 +33,16 @@ class DBConn:
         self.cursor.close()
         self.conn.close()
 
-    def starter_habits(self):
-        """Used to populate the first five habits for the user upon first run."""
-
-        habits = ["Drink Water", "Read", "Exercise", "Meditate", "Walk in Nature"]
-        descriptions = ["One Liter", "One Chapter", "Thirty Minutes", "Twenty Minutes", "One Hour"]
-        intervals = ["Daily", "Daily", "Daily", "Daily", "Weekly"]
-
-        for i in range(len(habits)):
-            self.add_record(habits[i], descriptions[i], intervals[i])
-
-    def add_record(self, habit_name: str, habit_desc: str, interval: str):
+    def add_record(self, habit_details: list):
         """
         Add record to the database/habits table.
 
-        :param habit_name: name of habit
-        :param habit_desc: description of the habit
-        :param interval: interval of the habit
+        :param habit_details: list containing the habit information; expecting a list of 6 items
         :return: success/fail message of the database operation
         """
 
-        # Get today's date to add to database so we have a record of when something was added
-        created_date = datetime.today().date()
+        # Unpack the list of habit details into their own variables
+        habit_name, habit_desc, interval, created_date, streak_count, max_streak = habit_details
 
         try:
             self.cursor.execute(
@@ -64,8 +52,8 @@ class DBConn:
                  'desc': habit_desc,
                  'interval': interval,
                  'created_date': str(created_date),
-                 'streak_count': 0,
-                 'max_streak': 0})
+                 'streak_count': streak_count,
+                 'max_streak': max_streak})
             self.conn.commit()
         except sqlite3.IntegrityError as e:
             return e, "ERROR: Habit already exists with that name!  Try again with a new name."
