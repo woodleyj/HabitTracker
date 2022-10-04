@@ -29,7 +29,7 @@ def create_table(title: str = "Habits", columns: list = None, rows: list = None)
 def create_history_table(title: str = "Task History", columns: list = None, rows: list = None):
     table = Table(title=title)
     if columns is None:
-        columns = ["Completed Date", "Week", "Habit Name"]
+        columns = ["Completed Date", "Completed Time", "Week", "Habit Name"]
     if rows is None:
         rows = ["None"]
 

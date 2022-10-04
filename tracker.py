@@ -27,6 +27,26 @@ def _starter_habits():
         message = db.add_record(new_habit.details)
         print(message)
 
+        # Add 4 weeks of history
+        if intervals[i] == "Daily":
+            print(f"Adding history for {habits[i]} starter task...")
+            for j in range(1, 29):
+                date = datetime.today() - timedelta(days=j)
+                completed_date = date.strftime("%Y-%m-%d")
+                completed_time = date.strftime("%H:%M")
+                completed_week = str(date.isocalendar().week)
+                db.add_history(habits[i], completed_date, completed_time, completed_week)
+
+        if intervals[i] == "Weekly":
+            print(f"Adding history for {habits[i]} starter task...")
+            for k in range(1, 5):
+                date = datetime.today() - timedelta(weeks=k)
+                completed_date = date.strftime("%Y-%m-%d")
+                completed_time = date.strftime("%H:%M")
+                completed_week = str(date.isocalendar().week)
+                db.add_history(habits[i], completed_date, completed_time, completed_week)
+
+    db.conn.commit()
 
 def add_habit():
     """Prompts the user for input and adds the habit information provided to the database."""
@@ -47,12 +67,35 @@ def add_habit():
     print(message)
 
 
+def complete_task():
+    """Prompts the user to select a task to complete, then updates the record in the database."""
+
+    # Create a connection to the database and retrieve habit records to display to the user
+    db = DBConn()
+    habits = db.get_habit_names()
+    if not habits:
+        return print("No tasks to complete.  Maybe you should create some first :)")
+
+    else:
+        choices = [item for sublist in habits for item in sublist]
+        choices.append("CANCEL")
+        habit_select_menu = create_habit_select_menu(choices, message="Which task do you want to complete?")
+
+        habit_name = inquirer.prompt(habit_select_menu)
+        habit_name = habit_name["selection"]
+
+        if habit_name == "CANCEL":
+            return "Action Canceled."
+
+        print(db.complete_task(habit_name=habit_name))
+
+
 def delete_habit():
     """Prompts the user to select an existing habit and then deletes the habit information from the database."""
 
     # Create a connection to the db and retrieve the habit records
     db = DBConn()
-    habits = db.display_habit_names()
+    habits = db.get_habit_names()
     if not habits:
         return print("No Habits to delete.  Maybe you should create some first :)")
 
@@ -72,35 +115,30 @@ def delete_habit():
                 print(f"Habit '{habit_name}' deleted.")
 
 
-def complete_task():
-    """Prompts the user to select a task to complete, then updates the record in the database."""
+def show_history():
+    """Shows the history of all previously completed tasks."""
 
-    # Create a connection to the database and retrieve habit records to display to the user
+    # Create connection to the database and allow user to select which habit to which they want to see the history
     db = DBConn()
-    habits = db.display_habit_names()
+    habits = db.get_habit_names()
     if not habits:
-        return click.echo("No tasks to complete.  Maybe you should create some first :)")
+        return print("No tasks to complete.  Maybe you should create some first :)")
 
     else:
         choices = [item for sublist in habits for item in sublist]
         choices.append("CANCEL")
-        habit_select_menu = create_habit_select_menu(choices, message="Which task do you want to complete?")
+        choices = ["ALL"] + choices
+        habit_select_menu = create_habit_select_menu(choices, message="Which habit's history would you like to see?")
 
         habit_name = inquirer.prompt(habit_select_menu)
         habit_name = habit_name["selection"]
 
         if habit_name == "CANCEL":
             return "Action Canceled."
-
-        print(db.complete_task(habit_name=habit_name))
-
-
-def display_history():
-    """Shows the history of all previously completed tasks."""
-
-    # Create connection to the database and retrieve the history the tracker table
-    db = DBConn()
-    history = db.display_all(table_name="tracker")
+        elif habit_name == "ALL":
+            history = db.get_all(table_name="tracker")
+        else:
+            history = db.get_all(table_name="tracker", habit_name=habit_name)
 
     # Arrange the information in a nice table to output to the user
     table = create_history_table(rows=history)
@@ -112,7 +150,7 @@ def show_interval(interval: str):
 
     # Create connection to the database and retrieve habits matching specified interval
     db = DBConn()
-    habits = db.display_interval_habits(interval)
+    habits = db.get_interval_habits(interval)
 
     if not habits:
         return "No habits to display"
@@ -148,14 +186,14 @@ def analyze_habits():
         print(table)
 
     elif answer["selection"] == "Longest Streak Overall":
-        longest = db.fetch_longest()
+        longest = db.get_longest_streak()
 
         print(f"Your longest streak is {longest[5]}, for habit: '{longest[0]}', which should be completed "
               f"{longest[2].upper()}.")
         print(f"You started this habit on {longest[3]} and the current streak is {longest[4]}.")
 
     elif answer["selection"] == "Longest Streak (select habit)":
-        tasks = db.display_habit_names()
+        tasks = db.get_habit_names()
         if not tasks:
             click.echo("No habits to display.  Please create some first.")
             return
@@ -172,7 +210,7 @@ def analyze_habits():
             print("Action canceled.")
             return
 
-        longest = db.fetch_longest(habit_selection)
+        longest = db.get_longest_streak(habit_selection)
         print(f"'{longest[0]}' -- {longest[2].upper()}: The longest streak for this habit is {longest[5]}.")
         print(f"You started this habit on {longest[3]} and the current streak is {longest[4]}.")
 
@@ -185,7 +223,7 @@ def modify_habits():
 
     # Create connection to the database and show habits to user
     db = DBConn()
-    tasks = db.display_habit_names()
+    tasks = db.get_habit_names()
     if not tasks:
         click.echo("No habits to display.  Please create some first.")
         return
@@ -244,7 +282,7 @@ def check_task_streak(tasks: list = None):
     # Create connection to the database
     db = DBConn()
     if tasks is None:
-        tasks = db.display_all()
+        tasks = db.get_all()
     if not tasks:
         click.echo("No habits to display.  Please create some first.")
         return
@@ -259,7 +297,7 @@ def check_task_streak(tasks: list = None):
     for row in tasks:
 
         # Row[0] represents the habit name
-        records = db.fetch_habit_history(row[0])
+        records = db.get_history(row[0])
         # Check interval/periodicity - row[2] represents interval
         if row[2] == "Daily":
             if today in records:
@@ -377,10 +415,10 @@ def delete_habit_command():
     click.echo(delete_habit())
 
 
-@cli.command("display-history")
-def display_history_command():
+@cli.command("show-history")
+def show_history_command():
     """Show the history of your habits."""
-    display_history()
+    show_history()
 
 
 @cli.command("show-today")

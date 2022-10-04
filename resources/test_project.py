@@ -20,10 +20,10 @@ class TestDB:
         self.db.complete_task("Test Habit")
 
     def test_fetch_habit_history(self):
-        self.db.fetch_habit_history("Test Habit")
+        self.db.get_history("Test Habit")
 
     def test_fetch_longest(self):
-        self.db.fetch_longest("Test Habit")
+        self.db.get_longest_streak("Test Habit")
 
     def test_update_record(self):
         self.db.update_record("Test Habit", "name", "Updated Test Habit")
@@ -36,7 +36,7 @@ class TestDB:
         self.db.delete_record("Updated Test Habit")
 
     def test_display_habit_name(self):
-        self.db.display_habit_names()
+        self.db.get_habit_names()
 
     def teardown_class(self):
         self.db.conn.close()  # Produces sqlite3 Error, but if I don't include this line then db doesn't delete

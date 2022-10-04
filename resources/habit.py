@@ -6,7 +6,7 @@ class Habit:
         self.name = name
         self.desc = desc
         self.interval = interval
-        self.created_date = datetime.today().date()
+        self.created_date = datetime.now().strftime("%Y-%m-%d %H:%M")
         self.streak_count = 0
         self.max_streak = 0
 
