@@ -18,7 +18,11 @@ with the following command:
 pip install -r requirements.txt
 ```
 ## Getting Started
-When the CLI is first run using ``python tracker.py`` from the project directory it will create the **main.db** file
+***Python 3.7 or higher is required.*** 
+
+Run ``python tracker.py`` 
+
+When the CLI is first run from the project directory it will create the **main.db** file
 and populate it with 5 starter habits.  These can be added upon or removed as the user sees fit.
 
 ### Adding Your First Habit
@@ -36,7 +40,7 @@ Select the task you would like to complete:
 ![img.png](img/complete-task.png)
 
 ### Viewing Your Habits
-You can see which habits still need to be performed and get habit information at a glance using ``python tracker.py show-today``
+You can see which habits need to be performed and get habit information at a glance using ``python tracker.py show-today``
 
 The last column conveniently shows whether or not the task has been completed for the current time period.
 
