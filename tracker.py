@@ -3,50 +3,12 @@ import inquirer
 from os import path, remove
 from rich import print
 from datetime import datetime, timedelta
+from resources.starter import starter_habits
 from resources.habit import Habit
 from resources.database import DBConn
 from resources.table import create_table, create_history_table
 from resources.menus import analyze_menu, create_delete_menu, create_habit_select_menu, interval_menu, modify_menu
 
-
-def _starter_habits():
-    """Set up the first 5 starter habits for the user"""
-
-    habits = ["Drink Water", "Read", "Exercise", "Meditate", "Walk in Nature"]
-    descriptions = ["One Liter", "One Chapter", "Thirty Minutes", "Twenty Minutes", "One Hour"]
-    intervals = ["Daily", "Daily", "Daily", "Daily", "Weekly"]
-
-    # Open connection to database
-    db = DBConn()
-
-    print("Setting up starter habits...\n")
-
-    # Loop through and create the 5 starter habits and write to database
-    for i in range(len(habits)):
-        new_habit = Habit(habits[i], descriptions[i], intervals[i])
-        message = db.add_record(new_habit.details)
-        print(message)
-
-        # Add 4 weeks of history
-        if intervals[i] == "Daily":
-            print(f"Adding history for {habits[i]} starter task...")
-            for j in range(1, 29):
-                date = datetime.today() - timedelta(days=j)
-                completed_date = date.strftime("%Y-%m-%d")
-                completed_time = date.strftime("%H:%M")
-                completed_week = str(date.isocalendar().week)
-                db.add_history(habits[i], completed_date, completed_time, completed_week)
-
-        if intervals[i] == "Weekly":
-            print(f"Adding history for {habits[i]} starter task...")
-            for k in range(1, 5):
-                date = datetime.today() - timedelta(weeks=k)
-                completed_date = date.strftime("%Y-%m-%d")
-                completed_time = date.strftime("%H:%M")
-                completed_week = str(date.isocalendar().week)
-                db.add_history(habits[i], completed_date, completed_time, completed_week)
-
-    db.conn.commit()
 
 def add_habit():
     """Prompts the user for input and adds the habit information provided to the database."""
@@ -195,7 +157,7 @@ def analyze_habits():
     elif answer["selection"] == "Longest Streak (select habit)":
         tasks = db.get_habit_names()
         if not tasks:
-            click.echo("No habits to display.  Please create some first.")
+            print("No habits to display.  Please create some first.")
             return
 
         choices = [t for task in tasks for t in task]
@@ -225,7 +187,7 @@ def modify_habits():
     db = DBConn()
     tasks = db.get_habit_names()
     if not tasks:
-        click.echo("No habits to display.  Please create some first.")
+        print("No habits to display.  Please create some first.")
         return
 
     choices = [t for task in tasks for t in task]
@@ -284,7 +246,7 @@ def check_task_streak(tasks: list = None):
     if tasks is None:
         tasks = db.get_all()
     if not tasks:
-        click.echo("No habits to display.  Please create some first.")
+        print("No habits to display.  Please create some first.")
         return
 
     # Set date information, so we can check if task was completed recently and if streak is still going
@@ -376,7 +338,7 @@ def interactive_menu():
 
     while True:
         sleep_time = 1.5
-        click.echo("Welcome to the Habit Tracker!")
+        print("Welcome to the Habit Tracker!")
         answer = inquirer.prompt(main_menu)
 
         if answer["selection"] == "Add Habit":
@@ -412,7 +374,7 @@ def add_habit_command():
 @cli.command("delete-habit")
 def delete_habit_command():
     """Delete a habit from your habit list."""
-    click.echo(delete_habit())
+    print(delete_habit())
 
 
 @cli.command("show-history")
@@ -453,5 +415,5 @@ def reset_command():
 
 if __name__ == '__main__':
     if not path.exists("main.db"):
-        _starter_habits()
+        starter_habits()
     cli()
