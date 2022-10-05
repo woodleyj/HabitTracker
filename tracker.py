@@ -332,7 +332,7 @@ def interactive_menu():
             "selection",
             message="What would you like to do?",
             choices=["Add Habit", "Complete Task", "Delete Habit", "Analyze Habits",
-                     "Modify Habits", "Show Today", "Exit App"],
+                     "Modify Habits", "Show Today", "Show History", "Exit App"],
         ),
     ]
 
@@ -358,6 +358,9 @@ def interactive_menu():
 
         elif answer["selection"] == "Show Today":
             show_today()
+
+        elif answer["selection"] == "Show History":
+            show_history()
 
         elif answer["selection"] == "Exit App":
             break
