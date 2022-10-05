@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-from habit import Habit
-from database import DBConn
+from resources.database import DBConn
+from resources.habit import Habit
 
 
 def starter_habits(db_name: str = None):

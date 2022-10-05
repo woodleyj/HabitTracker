@@ -374,7 +374,7 @@ def add_habit_command():
 @cli.command("delete-habit")
 def delete_habit_command():
     """Delete a habit from your habit list."""
-    print(delete_habit())
+    delete_habit()
 
 
 @cli.command("show-history")
